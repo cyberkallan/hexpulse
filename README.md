@@ -39,7 +39,7 @@
 
 **HexPulse** is a production-grade, modular firmware that transforms your **ESP device** into an **AI-powered portable intelligence platform**. Built on battle-tested ESP32 foundations, supercharged with cloud AI and cyberpunk aesthetics.
 
-> *"Your device is no longer just a tool — it's an intelligent companion."*
+> *"Your device is no longer just a tool it's an intelligent companion."*
 
 <div align="center">
 <table>
