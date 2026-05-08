@@ -1,0 +1,22 @@
+# PlatformIO
+.pio/
+.vscode/
+.idea/
+
+# Build artifacts
+*.bin
+*.elf
+*.map
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Firmware reference (not part of HexPulse)
+firmware-main/
+
+# Temp
+*.tmp
+*.bak
+*.swp
