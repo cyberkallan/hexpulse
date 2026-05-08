@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HexPulse — AI Pentesting Firmware</title>
+    <meta name="description" content="One-click firmware installer for HexPulse on your ESP device. The ultimate portable intelligence platform.">
+    <meta name="author" content="Arjun TM (@cyberkallan)">
+    <meta name="theme-color" content="#00FFFF">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ESP Web Tools -->
+    <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+    
+    <style>
+        :root {
+            --cyan: #00FFFF;
+            --cyan-glow: rgba(0, 255, 255, 0.4);
+            --cyan-dim: #00BFFF;
+            --magenta: #FF00FF;
+            --dark: #050508;
+            --dark-card: rgba(15, 15, 20, 0.8);
+            --dark-border: rgba(0, 255, 255, 0.15);
+            --text: #ffffff;
+            --text-dim: #a0a0b0;
+            --green: #00FF41;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 200%; height: 200%;
+            background:
+                linear-gradient(rgba(0,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 15s linear infinite;
+            z-index: -2;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1),
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Glow Orbs */
+        .glow-orb {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: orbFloat 10s ease-in-out infinite alternate;
+        }
+        
+        .orb-1 { top: -100px; left: -100px; }
+        .orb-2 { bottom: 100px; right: -100px; background: radial-gradient(circle, rgba(255,0,255,0.15) 0%, transparent 70%); animation-delay: -5s; }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--cyan);
+            background: linear-gradient(90deg, var(--cyan), var(--magenta));
+            -webkit-background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 10px rgba(0,255,255,0.2); }
+            to { text-shadow: 0 0 30px var(--cyan), 0 0 60px rgba(0,255,255,0.5); }
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Main Install Card */
+        .install-card {
+            background: var(--dark-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--dark-border);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .install-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,255,255,0.4);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,255,255,0.1);
+        }
+
+        .install-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            animation: borderScan 3s linear infinite;
+        }
+
+        @keyframes borderScan {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .install-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .install-desc {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Web Install Button Customization */
+        esp-web-install-button {
+            display: inline-block;
+        }
+
+        esp-web-install-button button {
+            background: linear-gradient(135deg, var(--cyan), #0088FF);
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 20px 60px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,255,255,0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        esp-web-install-button button::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: rgba(255,255,255,0.2);
+            transform: rotate(45deg) translateY(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        esp-web-install-button button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0,255,255,0.6);
+        }
+
+        esp-web-install-button button:hover::after {
+            transform: rotate(45deg) translateY(100%);
+        }
+
+        /* Browser Warning */
+        .browser-warning {
+            color: #FF3366;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Documentation Section */
+        .docs-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        @media(max-width: 768px) {
+            .docs-section { grid-template-columns: 1fr; }
+        }
+
+        .doc-card {
+            background: rgba(15, 15, 20, 0.6);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .doc-card:hover {
+            border-color: rgba(0,255,255,0.3);
+            background: rgba(20, 20, 25, 0.8);
+        }
+
+        .doc-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 15px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .step-list li::before {
+            content: '⚡';
+            position: absolute;
+            left: 0; top: 0;
+            color: var(--cyan);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .step-list strong {
+            color: var(--text);
+        }
+
+        /* Github Links Section */
+        .github-section {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--dark-border);
+        }
+
+        .btn-github {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #24292e;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            border: 1px solid #3a3f44;
+            transition: all 0.3s;
+            margin: 0 10px;
+        }
+
+        .btn-github:hover {
+            background: #2f363d;
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="title">HEXPULSE</h1>
+            <div class="subtitle">AI-Powered Pentesting Ecosystem</div>
+        </header>
+
+        <div class="install-card">
+            <h2 class="install-title">Initialize Firmware</h2>
+            <p class="install-desc">Connect your ESP device via USB-C to deploy the HexPulse system directly from your browser. No external tools required.</p>
+            
+            <esp-web-install-button manifest="manifest.json">
+                <button slot="activate">⚡ DEPLOY HEXPULSE</button>
+                <span slot="unsupported" class="browser-warning">
+                    ⚠️ Your browser does not support Web Serial. Please use Google Chrome or Microsoft Edge.
+                </span>
+                <span slot="not-allowed" class="browser-warning">
+                    ⚠️ Serial access was denied. Please allow access to flash the device.
+                </span>
+            </esp-web-install-button>
+        </div>
+
+        <div class="docs-section">
+            <div class="doc-card">
+                <h3>📖 Installation Guide</h3>
+                <ul class="step-list">
+                    <li><strong>Plug it in:</strong> Connect your ESP device to your computer using a high-quality USB-C data cable.</li>
+                    <li><strong>Deploy:</strong> Click the "DEPLOY HEXPULSE" button above.</li>
+                    <li><strong>Select Port:</strong> A browser popup will appear. Select the COM port that corresponds to your device.</li>
+                    <li><strong>Wait:</strong> Do not unplug your device while the progress bar is active. It takes about 2 minutes.</li>
+                    <li><strong>Boot:</strong> Once complete, your device will automatically reboot into HexPulse.</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h3>🔧 Troubleshooting</h3>
+                <ul class="step-list">
+                    <li><strong>No COM Port?</strong> Make sure you are using a USB <em>data</em> cable, not just a charging cable. You may also need CH340 or CP2102 drivers depending on your board.</li>
+                    <li><strong>Connection Error?</strong> Some ESP devices require you to hold the "BOOT" button while connecting the USB cable to enter flash mode.</li>
+                    <li><strong>Browser Support:</strong> This tool utilizes the Web Serial API. It is strictly supported on <strong>Chrome</strong>, <strong>Edge</strong>, and <strong>Opera</strong>. It will not work on Safari or Firefox.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="github-section">
+            <h3 style="font-family: 'Orbitron'; color: var(--text); margin-bottom: 20px;">Open Source & Community</h3>
+            <a href="https://github.com/cyberkallan/hexpulse" target="_blank" class="btn-github">
+                <svg height="24" viewBox="0 0 16 16" version="1.1" width="24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+                Star on GitHub
+            </a>
+            <a href="https://github.com/cyberkallan/hexpulse/issues" target="_blank" class="btn-github" style="background: transparent; color: var(--text);">
+                Report a Bug
+            </a>
+        </div>
+
+        <footer>
+            <p>Developed with ⚡ by <a href="https://github.com/cyberkallan" target="_blank">Arjun TM (@cyberkallan)</a></p>
+            <p style="margin-top: 5px;">HexMind AI Ecosystem V1.0.0 "Neon Genesis"</p>
+        </footer>
+    </div>
+</body>
+</html>

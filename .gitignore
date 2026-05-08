@@ -13,8 +13,8 @@
 Thumbs.db
 desktop.ini
 
-# Firmware reference (not part of HexPulse)
-firmware-main/
+# Firmware reference
+# (Removed from ignore so source is published)
 
 # Temp
 *.tmp
