@@ -6,6 +6,7 @@
 // =============================================================================
 #include "ble_keyboard_host.h"
 #include "core/display.h"
+#include "core/utils.h"
 #include <globals.h>
 
 BLEKeyboardHost bleKeyboardHost;
@@ -51,7 +52,7 @@ BLEKeyboardHost::~BLEKeyboardHost() { stop(); }
 // Lifecycle
 // =====================================================================
 void BLEKeyboardHost::begin() {
-    if (!NimBLEDevice::getInitialized()) {
+    if (!NimBLEDevice::isInitialized()) {
         NimBLEDevice::init("HexPulse");
     }
     _state = BLEKB_IDLE;
@@ -131,7 +132,7 @@ bool BLEKeyboardHost::connectToDevice(NimBLEAdvertisedDevice *device) {
     auto characteristics = pService->getCharacteristics(true);
     bool subscribed = false;
 
-    for (auto *chr : *characteristics) {
+    for (auto *chr : characteristics) {
         if (chr->getUUID() == NimBLEUUID(HID_REPORT_CHAR_UUID)) {
             if (chr->canNotify()) {
                 // Lambda callback for notifications

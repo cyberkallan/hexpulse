@@ -8,6 +8,9 @@
 #include "core/display.h"
 #include "core/scrollableTextArea.h"
 #include "core/utils.h"
+#include "core/mykeyboard.h"
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <LittleFS.h>
 #include <globals.h>

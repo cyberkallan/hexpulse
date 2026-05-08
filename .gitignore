@@ -5,6 +5,8 @@
 
 # Build artifacts
 *.bin
+# But allow bin files in the web flasher distribution
+!web-flasher-dist/*.bin
 *.elf
 *.map
 

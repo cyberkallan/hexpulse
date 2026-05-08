@@ -10,9 +10,12 @@
 #include "modules/hexmind/hexmind_chat.h"
 #include "modules/hexmind/ble_keyboard_host.h"
 #include "core/scrollableTextArea.h"
+#include "core/utils.h"
 
 class HexMindMenu : public MenuItemInterface {
 public:
+    HexMindMenu() : MenuItemInterface("HexMind AI") {}
+
     void optionsMenu(void) override {
         options = {};
 
@@ -32,23 +35,24 @@ public:
             HexMindChat::settingsMenu();
         }});
 
-        options.push_back({"About HexPulse", [=]() {
-            showAboutHexPulse();
+        options.push_back({"About HexPulse", [this]() {
+            this->showAboutHexPulse();
         }});
 
         addOptionToMainMenu();
         loopOptions(options, MENU_TYPE_SUBMENU, getName().c_str());
     }
 
-    String getName(void) override { return "HexMind AI"; }
+    String getName(void) { return "HexMind AI"; }
+    bool hasTheme() override { return false; }
+    String themePath() override { return ""; }
 
-    void draw(float scale) override {
+    void drawIcon(float scale) override {
         // Draw HexMind AI icon — hexagonal brain
-        int x = tftWidth / 2;
-        int y = tftHeight / 2;
+        int x = iconCenterX;
+        int y = iconCenterY;
 
-        tft.fillScreen(bruceConfig.bgColor);
-        drawMainBorder(false);
+        clearIconArea();
 
         // Hexagon shape
         int r = 28 * scale;
